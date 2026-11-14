@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kerala Ayurveda Store</title>
+<style>
+:root{--bg:#f6f4ee;--sf:#fff;--tx:#1f2a1f;--mu:#667066;--ac:#2e7d32;--ac2:#f9a825;--bd:#dfe3d8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121712;--sf:#1c231c;--tx:#e8efe6;--mu:#9aa89a;--ac:#66bb6a;--bd:#2d372d;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121712;--sf:#1c231c;--tx:#e8efe6;--mu:#9aa89a;--ac:#66bb6a;--bd:#2d372d;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--tx)}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:#1b5e20;color:#fff;display:flex;gap:12px;align-items:center;padding:10px 16px;flex-wrap:wrap}
+header h1{font-size:18px;margin:0;flex:0 0 auto}
+header input{flex:1;min-width:140px;padding:9px 12px;border:0;border-radius:6px;font-size:14px}
+header button{background:var(--ac2);color:#222;border:0;padding:9px 14px;border-radius:6px;font-weight:600;cursor:pointer}
+.wrap{display:flex;gap:16px;padding:16px;max-width:1200px;margin:auto}
+aside{flex:0 0 220px;background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:14px;align-self:flex-start}
+aside h3{margin:0 0 8px;font-size:14px}
+aside label{display:block;padding:6px 4px;font-size:14px;cursor:pointer}
+aside select{width:100%;padding:7px;margin-top:4px;background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:6px}
+main{flex:1;min-width:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:4px}
+.card svg{width:100%;height:120px;border-radius:6px}
+.card b{font-size:14px;line-height:1.3;min-height:36px}
+.card small{color:var(--mu)}
+.pr{font-weight:700;font-size:16px}
+.card button,.pay{background:var(--ac);color:#fff;border:0;padding:8px;border-radius:6px;cursor:pointer;font-weight:600}
+.drawer{position:fixed;right:0;top:0;bottom:0;width:min(360px,100%);background:var(--sf);border-left:1px solid var(--bd);padding:16px;padding-top:calc(16px + env(safe-area-inset-top,0px));transform:translateX(100%);transition:.25s;z-index:8;overflow:auto}
+.drawer.on{transform:none}
+.row{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid var(--bd);font-size:14px}
+.row button{padding:2px 8px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);border-radius:4px;cursor:pointer}
+.modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;z-index:9;padding:16px}
+.modal.on{display:flex}
+.modal div{background:var(--sf);padding:20px;border-radius:10px;width:min(340px,100%);display:flex;flex-direction:column;gap:10px}
+.modal input{padding:9px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--tx)}
+.note{font-size:12px;color:var(--mu)}
+.modal select{padding:9px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--tx)}
+.modal #mb{max-height:92vh;overflow:auto}.modal #mb.wide{width:min(520px,100%)}
+.offer{background:var(--sf);border:1px dashed var(--ac2);color:var(--tx);padding:7px 12px;border-radius:20px;cursor:pointer;font-size:13px}
+.modal svg{width:100%;height:auto;border-radius:8px}
+.dl{cursor:pointer}.dl:hover{text-decoration:underline}
+@media(max-width:700px){.wrap{flex-direction:column}aside{flex:none;width:100%}}
+</style></head><body>
+<header><h1>🌿 Kerala Ayurveda Store</h1><input id="q" placeholder="Search 100 products..."><button id="si">Sign in</button><button id="ad">Admin</button><button id="ct">Cart (<span id="n">0</span>)</button></header>
+<div id="offers"></div>
+<div class="wrap">
+<aside><h3>Categories</h3><div id="cats"></div><h3 style="margin-top:12px">Brand</h3><select id="br"></select></aside>
+<main><p class="note" id="cnt"></p><div class="grid" id="g"></div></main>
+</div>
+<div class="drawer" id="dr"><h2 style="margin-top:0">Your cart</h2><div id="items"></div><p><input id="cc" placeholder="Coupon code" style="padding:7px;width:55%"> <button id="ac" style="padding:7px">Apply</button><br><span class="note" id="cm"></span></p><p><b>Total: ₹<span id="tot">0</span></b></p><button class="pay" id="pp" style="width:100%">Proceed to payment</button><button class="row" id="cl" style="width:100%;margin-top:8px">Close</button></div>
+<div class="modal" id="m"><div id="mb"></div></div><div class="modal" id="adm"><section id="ab" style="background:var(--sf);padding:16px;border-radius:10px;width:min(760px,100%);max-height:90vh;overflow:auto"></section></div>
+<script>
+var CATS=[["Oils","#2e7d32","Dhanwantharam Thailam|Ksheerabala Thailam|Mahanarayana Thailam|Neelibringadi Keram|Eladi Keram|Pinda Thailam|Sahacharadi Thailam|Karpasasthyadi Thailam|Bala Thailam|Gandha Thailam|Chemparuthyadi Keram|Kayyunyadi Keram|Balahatadi Keram|Kesini Hair Oil|Durdurapatradi Keram|Balaswagandhadi Thailam|Myaxyl Pain Relief Oil|Santhwanam Oil|Arimedadi Thailam|Eladi Thailam"],
+["Medicines and Tablets","#00796b","Triphala Tablets|Yogaraja Guggulu|Kanchanar Guggulu|Chandraprabha Gulika|Maharasnadi Kwath Tablets|Nimbadi Kwath Tablets|Nisakathakadi Kwath Tablets|Varanadi Kwath Tablets|Sukumaram Kwath Tablets|Ashtavargam Kwath Tablets|Normact Tablets|Glymin Tablets|Heposem Tablets|Menovin Tablets|Evakalp Tablets|Alsactil Tablets|Dhanwantharam Gulika|Vilwadi Pills|Promactil Capsules|Brahmi Pearls Capsules"],
+["Beauty and Hair","#c2185b","Kumkumadi Oil|Swarnamukhi Face Pack|Herbal Neem Face Pack|Aloe Vera Herbal Gel|Kumkumadi Cream|Herbal Turmeric Face Pack|Herbal Sandalwood Powder|Ayurvedic Hair Growth Oil|Bhringraj Hair Oil|Hibiscus Hair Oil|Herbal Anti-Dandruff Oil|Herbal Hair Cleanser|Ayurvedic Herbal Soap|Herbal Body Massage Oil|Herbal Skin Care Cream"],
+["Arishtam and Asavam","#8d6e63","Asokarishta|Aswagandharishtam|Balarishta|Abhayarishtam|Amrutharishtam|Draksharishta|Dasamoolarishta|Dasamoolajeerakarishta|Saraswatharishta|Vasarishta|Punarnavasavam|Bhringarajasavam|Kumaryasavam|Chandanasavam|Kanakasavam"],
+["Choornam and Kwath","#ef6c00","Avipathi Choornam|Triphala Choornam|Aswagandha Choornam|Brahmi Choornam|Rasnadi Choornam|Kolakulathadi Choornam|Nagaraadi Choornam|Mustha Choornam|Sitopaladi Choornam|Sudarshana Choornam|Amruthotharam Kwath|Guluchyadi Kwath|Dhanwantharam Kwath|Patolakatukurohinyadi Kwath|Mahathikthaka Kwath"],
+["Lehyam and Supplements","#6a1b9a","Chyavanprash|Narasimha Rasayanam|Vilwadi Lehyam|Ashwagandhadi Lehyam|Brahmi Ghritham|Indukantham Ghritham|Mahathikthaka Ghritham|Kalyanaka Ghritham|Balakalpam Syrup|Mathrukalpam|Ajamamsa Rasayanam|Kerapookkuladi Lehyam|Indukantham Kwath|Gandharvahasthadi Kwath|Kaisoravatakam"]];
+var BR=["Kerala Ayurveda","Oushadhi","Nagarjuna Ayurveda","Vaidyaratnam","Kottakkal Arya Vaidya Sala","Sitaram Ayurveda","Ashtavaidyan Thaikkattu Mooss","Sreedhareeyam"];
+var P=[],id=0;CATS.forEach(function(c){c[2].split("|").forEach(function(n){id++;P.push({id:id,n:n,c:c[0],col:c[1],b:BR[id%8],p:90+(id*37)%420})})});
+var SUB=0,cart={},user=null,sel={},$=function(i){return document.getElementById(i)};
+var tk="";try{cart=JSON.parse(localStorage.getItem("cart")||"{}");user=localStorage.getItem("user");tk=localStorage.getItem("tk")||""}catch(e){}if(!tk)user=null;
+function save(){try{localStorage.setItem("cart",JSON.stringify(cart))}catch(e){}}
+function img(p){var n=p.n,c=p.col,w=n.split(' ')[0].slice(0,11),b,
+lab=function(x,y,wd,ht){return '<rect x="'+x+'" y="'+y+'" width="'+wd+'" height="'+ht+'" rx="3" fill="#fff" opacity=".93"/><text x="'+(x+wd/2)+'" y="'+(y+ht/2+3)+'" text-anchor="middle" font-size="7.5" font-weight="700" fill="'+c+'">'+w+'</text>'},
+leaf='<ellipse cx="85" cy="104" rx="46" ry="6" fill="#000" opacity=".12"/><path d="M138 98q10-20 22-10q-4 15-22 10z" fill="#43a047"/><path d="M10 100q8-16 19-8q-3 13-19 8z" fill="#66bb6a"/>';
+if(/Tablets|Gulika|Guggulu|Pills|Capsules/.test(n))b='<rect x="62" y="36" width="46" height="62" rx="8" fill="#b26a00"/><rect x="65" y="24" width="40" height="14" rx="3" fill="#fff"/>'+lab(67,56,36,26)+'<circle cx="128" cy="98" r="5" fill="#8d6e63"/><circle cx="139" cy="101" r="5" fill="#a1887f"/><circle cx="32" cy="98" r="5" fill="#8d6e63"/>';
+else if(/Soap/.test(n))b='<rect x="44" y="54" width="82" height="42" rx="16" fill="'+c+'"/><text x="85" y="79" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">HERBAL</text>';
+else if(/Choornam|Powder|Cleanser/.test(n))b='<path d="M52 24h66l6 74h-78z" fill="'+c+'"/><rect x="52" y="24" width="66" height="8" fill="#0004"/>'+lab(60,50,50,28);
+else if(/Gel|Cream|Face Pack|Lehyam|Rasayanam|Ghritham|Mathrukalpam|Kaisoravatakam|Chyavanprash/.test(n))b='<rect x="46" y="48" width="78" height="50" rx="12" fill="'+c+'"/><rect x="42" y="36" width="86" height="14" rx="5" fill="#5d4037"/>'+lab(58,60,54,26);
+else if(/rishta|rishtam|asavam|Kwath|Syrup/i.test(n))b='<rect x="78" y="26" width="14" height="22" fill="#4e342e"/><rect x="75" y="19" width="20" height="9" rx="2" fill="#c62828"/><rect x="62" y="44" width="46" height="54" rx="9" fill="#4e342e"/><rect x="62" y="72" width="46" height="26" rx="9" fill="#8d4b1f" opacity=".7"/>'+lab(67,52,36,24);
+else b='<rect x="77" y="28" width="16" height="14" fill="#333"/><ellipse cx="85" cy="18" rx="9" ry="12" fill="#333"/><rect x="58" y="40" width="54" height="58" rx="14" fill="#a86b00"/><rect x="58" y="68" width="54" height="30" rx="14" fill="#d89200" opacity=".6"/>'+lab(66,56,38,26);
+return '<svg viewBox="0 0 170 120"><rect width="170" height="120" fill="'+c+'" opacity=".15"/>'+leaf+b+'</svg>'}
+function imgOld(p){var s=p.n.split(" ").slice(0,2).map(function(w){return w[0]}).join("");
+return '<svg viewBox="0 0 170 120"><rect width="170" height="120" fill="'+p.col+'" opacity=".15"/><rect x="62" y="22" width="46" height="82" rx="10" fill="'+p.col+'"/><rect x="73" y="10" width="24" height="16" rx="3" fill="#5d4037"/><rect x="68" y="50" width="34" height="34" rx="4" fill="#fff" opacity=".9"/><text x="85" y="73" text-anchor="middle" font-size="16" font-weight="700" fill="'+p.col+'">'+s+'</text></svg>'}
+CATS.forEach(function(c){$("cats").insertAdjacentHTML("beforeend",'<label><input type="checkbox" value="'+c[0]+'"> '+c[0]+'</label>')});
+$("br").innerHTML='<option value="">All brands</option>'+BR.map(function(b){return"<option>"+b+"</option>"}).join("");
+function render(){var q=$("q").value.toLowerCase(),b=$("br").value,cs=[].slice.call(document.querySelectorAll("#cats input:checked")).map(function(x){return x.value});
+var L=P.filter(function(p){return !p.h&&(!cs.length||cs.indexOf(p.c)>-1)&&(!b||p.b==b)&&p.n.toLowerCase().indexOf(q)>-1});
+$("cnt").textContent=L.length+" products";
+$("g").innerHTML=L.map(function(p){return'<div class="card"><span data-d="'+p.id+'" class="dl" style="display:block">'+img(p)+'</span><b data-d="'+p.id+'" class="dl">'+esc(p.n)+'</b><small>'+esc(p.b||"")+'</small><span class="pr">₹'+p.p+'</span><button data-a="'+p.id+'">Add to cart</button></div>'}).join("")}
+function drawCart(){var t=0,k=0;$("items").innerHTML=Object.keys(cart).map(function(i){var p=byId(i),q=cart[i];if(!p)return"";t+=p.p*q;k+=q;return'<div class="row"><span>'+p.n+'<br><small>₹'+p.p+' × '+q+'</small></span><span><button data-m="'+i+'">−</button> <button data-a="'+i+'">+</button></span></div>'}).join("")||'<p class="note">Cart is empty.</p>';
+SUB=t;var cok=coup&&t>=(coup.min||0),dsc=cok?Math.round(t*coup.pct/100):0;$("tot").textContent=Math.round((t-dsc)*100)/100;$("cm").textContent=coup?(cok?"−₹"+dsc+" ("+coup.code+")":"Add ₹"+Math.ceil(coup.min-t)+" more to use "+coup.code):"";$("n").textContent=k;save()}
+function modal(h,w){$("mb").className=w?"wide":"";$("mb").innerHTML=h;$("m").classList.add("on")}
+function authApi(path,body){var h={"content-type":"application/json"};if(tk)h.authorization="Bearer "+tk;
+return fetch("/api/auth/"+path,{method:"POST",headers:h,body:JSON.stringify(body||{})}).then(function(r){return r.json().catch(function(){return{}}).then(function(d){d.ok=r.ok;d.status=r.status;return d})}).catch(function(){return{ok:false,error:"Network problem. Please try again."}})}
+function label(){return localStorage.getItem("uname")||(user?user.split("@")[0]:"Sign in")}
+function setUser(u,t){user=u.email;tk=t;try{localStorage.setItem("user",u.email);localStorage.setItem("tk",t);localStorage.setItem("uname",(u.name||"").split(" ")[0])}catch(e){}$("si").textContent=label()}
+function signOut(){if(tk)authApi("logout");user=null;tk="";try{localStorage.removeItem("user");localStorage.removeItem("tk");localStorage.removeItem("uname")}catch(e){}$("si").textContent="Sign in"}
+function acct(){modal('<h3 style="margin:0">Your account</h3><p style="margin:0">'+esc(user)+'</p><b>My orders</b><span id="mo" class="note">Loading…</span><button class="pay" id="so">Sign out</button>',true);
+$("so").onclick=function(){signOut();$("m").classList.remove("on")};
+fetch("/api/my/orders",{headers:{authorization:"Bearer "+tk}}).then(function(r){if(r.status==401){signOut();return[]}return r.json()}).then(function(o){if(!$("mo"))return;
+$("mo").innerHTML=o.length?o.map(function(x){return'<span style="display:block;border-bottom:1px solid var(--bd);padding:6px 0;color:var(--tx);font-size:13px"><b>#'+x.id+'</b> · '+new Date(x.ts).toLocaleDateString()+' · ₹'+x.total+'<br>'+x.items.map(function(i){return esc(i.n)+' ×'+i.q}).join(", ")+'<br>Payment: <b>'+esc(x.ps)+'</b> · Status: <b>'+esc(x.status)+'</b></span>'}).join(""):"No orders yet."}).catch(function(){if($("mo"))$("mo").textContent="Could not load your orders."})}
+function sign(mode,email,msg){if(mode=="verify")return verifyScreen(email,msg);var reg=mode=="reg";
+modal('<h3 style="margin:0">'+(reg?"Create account":"Sign in")+'</h3>'+(reg?'<input id="an" placeholder="Full name" autocomplete="name">':'')
++'<input id="ae" type="email" placeholder="Email" autocomplete="email" value="'+esc(email||"")+'">'
++'<input id="ap" type="password" placeholder="Password'+(reg?' (at least 8 characters)':'')+'" autocomplete="'+(reg?"new-password":"current-password")+'">'
++'<p class="note" id="am" style="color:#c62828;margin:0">'+esc(msg||"")+'</p>'
++'<button class="pay" id="ago">'+(reg?"Send verification code":"Sign in")+'</button>'
++'<p class="note" style="margin:0">'+(reg?'Already registered? <a href="#" id="asw">Sign in</a>':'New here? <a href="#" id="asw">Create account</a>')+'</p>');
+$("asw").onclick=function(e){e.preventDefault();sign(reg?"login":"reg",$("ae").value)};
+$("ago").onclick=async function(){var em=$("ae").value.trim().toLowerCase(),pw=$("ap").value,b=$("ago"),m=$("am");
+if(em.indexOf("@")<1||!pw){m.textContent="Please enter your email and password.";return}
+b.disabled=true;var d=await authApi(reg?"register":"login",reg?{name:$("an").value.trim(),email:em,password:pw}:{email:em,password:pw});b.disabled=false;
+if(d.ok&&reg)return verifyScreen(em,"We sent a 6-digit code to "+em+".");
+if(d.ok){setUser(d.user,d.token);$("m").classList.remove("on");return}
+if(d.needsVerify)return verifyScreen(em,d.error);
+m.textContent=d.error||"Something went wrong. Please try again."}}
+var vt=null;
+function verifyScreen(email,msg){
+modal('<h3 style="margin:0">Verify your email</h3><p class="note" style="margin:0" id="vi">'+esc(msg||"")+'</p>'
++'<input id="vc" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="6-digit code" style="letter-spacing:6px;font-size:20px;text-align:center">'
++'<p class="note" id="vm" style="color:#c62828;margin:0"></p>'
++'<button class="pay" id="vgo">Verify</button><button class="row" id="vrs" disabled style="width:100%"></button>'
++'<p class="note" style="margin:0">Check your Spam folder if you do not see it. The code is valid for 10 minutes.</p>');
+var left=60;clearInterval(vt);
+function tick(){var b=$("vrs");if(!b){clearInterval(vt);return}if(left>0){b.disabled=true;b.textContent="Resend code in "+left+"s";left--}else{b.disabled=false;b.textContent="Resend code";clearInterval(vt)}}
+tick();vt=setInterval(tick,1000);
+$("vc").oninput=function(){this.value=this.value.replace(/\D/g,"").slice(0,6)};
+$("vrs").onclick=async function(){this.disabled=true;var d=await authApi("resend",{email:email});
+if(d.ok){$("vm").textContent="";$("vi").textContent="A new code was sent to "+email+".";left=60;clearInterval(vt);tick();vt=setInterval(tick,1000)}
+else{$("vm").textContent=d.error||"Could not send the code.";this.disabled=false}};
+$("vgo").onclick=async function(){var c=$("vc").value.trim(),b=$("vgo");if(c.length!=6){$("vm").textContent="Enter the 6-digit code.";return}
+b.disabled=true;var d=await authApi("verify",{email:email,code:c});b.disabled=false;
+if(d.ok){clearInterval(vt);setUser(d.user,d.token);modal('<h3 style="margin:0">Email verified ✓</h3><p>Welcome'+(d.user.name?", "+esc(d.user.name.split(" ")[0]):"")+'! You are signed in.</p><button class="pay" onclick="document.getElementById(\'m\').classList.remove(\'on\')">Continue shopping</button>')}
+else $("vm").textContent=d.error||"Could not verify. Please try again."}}
+if(tk)fetch("/api/me",{headers:{authorization:"Bearer "+tk}}).then(function(r){if(r.status==401)signOut()}).catch(function(){});
+if(user)$("si").textContent=label();
+document.addEventListener("click",function(e){var t=e.target;
+if(t.dataset.a){cart[t.dataset.a]=(cart[t.dataset.a]||0)+1;drawCart()}
+if(t.dataset.m){if(--cart[t.dataset.m]<1)delete cart[t.dataset.m];drawCart()}
+if(t===$("m"))$("m").classList.remove("on");
+var dd=t.closest&&t.closest("[data-d]");if(dd)showDetail(dd.dataset.d);
+var oc=t.closest&&t.closest("[data-oc]");if(oc){$("cc").value=oc.dataset.oc;$("ac").click();$("dr").classList.add("on")}});
+$("q").oninput=render;$("br").onchange=render;$("cats").onchange=render;
+$("ct").onclick=function(){$("dr").classList.add("on")};$("cl").onclick=function(){$("dr").classList.remove("on")};
+$("si").onclick=function(){user?acct():sign("login")};
+var CFG={upiId:"",upiName:"Kerala Ayurveda"},STATES=["Kerala","Tamil Nadu","Karnataka","Andhra Pradesh","Telangana","Maharashtra","Goa","Gujarat","Rajasthan","Delhi","Uttar Pradesh","Madhya Pradesh","Bihar","West Bengal","Odisha","Punjab","Haryana","Himachal Pradesh","Uttarakhand","Jharkhand","Chhattisgarh","Assam","Arunachal Pradesh","Manipur","Meghalaya","Mizoram","Nagaland","Sikkim","Tripura","Jammu and Kashmir","Ladakh","Chandigarh","Puducherry","Lakshadweep","Andaman and Nicobar Islands","Dadra and Nagar Haveli and Daman and Diu"];
+fetch("/api/config").then(function(r){return r.json()}).then(function(d){CFG=d}).catch(function(){});
+function addrForm(msg,a){a=a||{};try{if(!a.name)a=JSON.parse(localStorage.getItem("addr")||"{}")}catch(e){}
+modal('<h3 style="margin:0">Delivery address</h3><input id="a_n" placeholder="Full name" autocomplete="name" value="'+esc(a.name||"")+'">'
++'<input id="a_p" type="tel" inputmode="numeric" maxlength="10" placeholder="10-digit mobile number" autocomplete="tel-national" value="'+esc(a.phone||"")+'">'
++'<input id="a_1" placeholder="House / flat no., building, street" autocomplete="address-line1" value="'+esc(a.line1||"")+'">'
++'<input id="a_2" placeholder="Area, landmark (optional)" autocomplete="address-line2" value="'+esc(a.line2||"")+'">'
++'<input id="a_c" placeholder="City / town" autocomplete="address-level2" value="'+esc(a.city||"")+'">'
++'<select id="a_s" autocomplete="address-level1">'+STATES.map(function(x){return'<option'+((a.state||"Kerala")==x?" selected":"")+'>'+x+'</option>'}).join("")+'</select>'
++'<input id="a_z" type="tel" inputmode="numeric" maxlength="6" placeholder="PIN code (6 digits)" autocomplete="postal-code" value="'+esc(a.pin||"")+'">'
++'<p class="note" id="a_m" style="color:#c62828;margin:0">'+esc(msg||"")+'</p><button class="pay" id="a_go">Continue to payment</button>',true);
+$("a_go").onclick=function(){var v={name:$("a_n").value.trim(),phone:$("a_p").value.replace(/\D/g,"").replace(/^(91|0)(?=\d{10}$)/,""),line1:$("a_1").value.trim(),line2:$("a_2").value.trim(),city:$("a_c").value.trim(),state:$("a_s").value,pin:$("a_z").value.trim()},m=$("a_m");
+if(!v.name||!v.line1||!v.city){m.textContent="Please fill your name, address and city.";return}
+if(!/^[6-9]\d{9}$/.test(v.phone)){m.textContent="Enter a valid 10-digit mobile number.";return}
+if(!/^[1-9]\d{5}$/.test(v.pin)){m.textContent="Enter a valid 6-digit PIN code.";return}
+try{localStorage.setItem("addr",JSON.stringify(v))}catch(e){}upiScreen(v)}}
+function upiScreen(a,msg){var amt=$("tot").textContent,link=CFG.upiId?"upi://pay?pa="+encodeURIComponent(CFG.upiId)+"&pn="+encodeURIComponent(CFG.upiName)+"&am="+amt+"&cu=INR&tn="+encodeURIComponent("Order payment"):"";
+modal('<h3 style="margin:0">Pay with UPI</h3><p style="margin:0">Amount to pay: <b style="font-size:20px">₹'+amt+'</b></p>'
++'<img id="qr" src="/upi-qr.png" alt="UPI QR code" style="width:min(240px,100%);align-self:center;border:1px solid var(--bd);border-radius:8px">'
++(CFG.upiId?'<p class="note" style="margin:0;text-align:center">UPI ID: <b>'+esc(CFG.upiId)+'</b></p>':'')
++(link?'<a class="pay" href="'+link+'" style="text-align:center;text-decoration:none;display:block;padding:9px">Open UPI app (on phone)</a>':'')
++'<p class="note" style="margin:0">1. Scan the QR code (or use the button) and pay exactly ₹'+amt+'.<br>2. Copy the <b>UPI transaction ID / UTR</b> from your payment app.<br>3. Enter it below. We check our bank account and confirm your order.</p>'
++'<input id="u_t" placeholder="UPI transaction ID (UTR)" autocomplete="off" style="text-transform:uppercase">'
++'<p class="note" id="u_m" style="color:#c62828;margin:0">'+esc(msg||"")+'</p>'
++'<button class="pay" id="u_go">I have paid — place order</button><button class="row" id="u_bk" style="width:100%">Back</button>',true);
+$("qr").onerror=function(){this.style.display="none"};
+$("u_bk").onclick=function(){addrForm("",a)};
+$("u_go").onclick=async function(){var u=$("u_t").value.trim().toUpperCase(),b=$("u_go");
+if(!/^[A-Z0-9]{8,30}$/.test(u)){$("u_m").textContent="Enter the transaction ID shown in your UPI app (letters and numbers only).";return}
+b.disabled=true;b.textContent="Placing order…";var r=await placeOrder(a,u);
+if(r.ok){cart={};drawCart();$("dr").classList.remove("on");modal('<h3 style="margin:0">Order received ✓</h3><p style="margin:0">Order <b>#'+r.id+'</b> · ₹'+r.total+'</p><p class="note" style="margin:0">We will check your UPI payment and confirm. You can follow the payment and delivery status under your name (top right) → My orders.</p><button class="pay" onclick="document.getElementById(\'m\').classList.remove(\'on\')">Close</button>')}
+else if(r.status==401){signOut();sign("login","","Your session expired. Please sign in again.")}
+else{b.disabled=false;b.textContent="I have paid — place order";$("u_m").textContent=r.error||"Could not place the order. Please try again."}}}
+$("pp").onclick=function(){if(!Object.keys(cart).length)return;if(!user){sign();return}addrForm()};
+function showDetail(i){var p=byId(i);if(!p)return;
+var im=p.im?'<img alt="'+esc(p.n)+'" src="'+p.im+'" style="width:100%;max-height:280px;object-fit:contain;border-radius:8px">':img(p);
+modal('<section style="display:flex;gap:14px;flex-wrap:wrap"><span style="flex:1 1 200px;min-width:180px">'+im+'</span><span style="flex:1 1 200px;display:flex;flex-direction:column;gap:6px"><h3 style="margin:0">'+esc(p.n)+'</h3><span class="note">'+esc(p.b||"")+' · '+esc(p.c)+'</span><span class="pr" style="font-size:22px">₹'+p.p+'</span><button class="pay" id="dadd">Add to cart</button></span></section>'
++'<p style="margin:0"><b>About this product</b><br>'+esc(p.d||"Traditional Kerala Ayurvedic product.")+'</p>'
++'<p style="margin:0"><b>How to use / dosage</b><br>'+esc(p.u||"Use as directed by your Ayurvedic physician or as printed on the product label.")+'</p>'
++'<p class="note" style="margin:0">Ayurvedic products are not a substitute for medical advice. Please consult a qualified Ayurvedic physician before use, especially during pregnancy, for children, or if you take other medicines.</p>'
++'<button class="row" id="dcl" style="width:100%">Close</button>',true);
+$("dadd").onclick=function(){cart[p.id]=(cart[p.id]||0)+1;drawCart();$("m").classList.remove("on");$("dr").classList.add("on")};
+$("dcl").onclick=function(){$("m").classList.remove("on")}}
+function loadOffers(){fetch("/api/offers").then(function(r){return r.json()}).then(function(o){if(!Array.isArray(o)||!o.length){$("offers").innerHTML="";return}
+$("offers").innerHTML='<section style="max-width:1200px;margin:12px auto 0;padding:0 16px;display:flex;gap:8px;flex-wrap:wrap">'+o.map(function(x){return'<button class="offer" data-oc="'+esc(x.code)+'">🏷️ <b>'+esc(x.code)+'</b> — '+x.pct+'% off'+(x.min?' on orders above ₹'+x.min:'')+(x.note?' · '+esc(x.note):'')+'</button>'}).join("")+'</section>'}).catch(function(){})}
+function byId(i){return P.filter(function(x){return x.id==i})[0]}
+var editD=0,AK=sessionStorage.getItem("ak")||"",coup=null,tab="p",od=[],cd=[];
+function api(m,u,b){return fetch(u,{method:m,headers:{"content-type":"application/json","x-admin-key":AK},body:b?JSON.stringify(b):undefined}).then(function(r){return r.ok?r.json():Promise.reject(r)})}
+var _i=img;img=function(p){return p.im?'<img alt="" src="'+p.im+'" style="width:100%;height:120px;object-fit:cover;border-radius:6px">':_i(p)};
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function admOn(){return $("adm").classList.contains("on")}
+function load(){return api("GET",AK?"/api/admin/products":"/api/products").catch(function(){return api("GET","/api/products")}).then(function(a){P.length=0;a.forEach(function(x){P.push(x)});render();drawCart()})}
+function refresh(){return Promise.all([api("GET","/api/admin/orders"),api("GET","/api/admin/coupons"),load()]).then(function(r){od=r[0];cd=r[1];showAdm()})}
+function savep(id,patch){return api("PATCH","/api/admin/products/"+id,patch).then(load).then(function(){if(admOn())showAdm()})}
+function toURL(b){return new Promise(function(r){var f=new FileReader();f.onload=function(){r(f.result)};f.readAsDataURL(b)})}
+async function shrink(f){try{var b=await createImageBitmap(f),s=Math.min(1,600/Math.max(b.width,b.height)),c=document.createElement("canvas");c.width=b.width*s;c.height=b.height*s;c.getContext("2d").drawImage(b,0,0,c.width,c.height);return await toURL(await new Promise(function(r){c.toBlob(r,"image/jpeg",.8)}))}catch(e){return toURL(f)}}
+async function addP(){var n=$("np_n").value.trim(),pr=+$("np_p").value;if(!n||!pr)return;var f=$("np_f").files[0],im=f?await shrink(f):null;
+await api("POST","/api/admin/products",{n:n,c:$("np_c").value,b:$("np_b").value,p:pr,im:im});refresh()}
+async function bulk(fs){for(var i=0;i<fs.length;i++){var m=fs[i].name.match(/^(\d+)/);if(!m||!byId(+m[1]))continue;try{await api("PATCH","/api/admin/products/"+m[1],{im:await shrink(fs[i])})}catch(e){}}refresh()}
+function placeOrder(a,utr){var it=Object.keys(cart).map(function(i){return{id:+i,q:cart[i]}}),cok=coup&&SUB>=(coup.min||0);
+return fetch("/api/orders",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+tk},body:JSON.stringify({name:a.name,phone:a.phone,line1:a.line1,line2:a.line2,city:a.city,state:a.state,pin:a.pin,utr:utr,coupon:cok?coup.code:"",items:it})}).then(function(r){return r.json().catch(function(){return{}}).then(function(d){d.ok=r.ok;d.status=r.status;return d})}).catch(function(){return{ok:false,error:"Network problem. Please try again."}})}
+function edh(){var e=editD&&byId(editD);return e?'<p style="border:1px solid var(--bd);padding:8px;border-radius:8px"><b>Details: '+esc(e.n)+'</b><br><textarea id="pd_d" rows="3" style="width:100%" placeholder="About this product">'+esc(e.d||"")+'</textarea><textarea id="pd_u" rows="3" style="width:100%" placeholder="How to use / dosage (copy it from the manufacturer label)">'+esc(e.u||"")+'</textarea><button data-act="pds">Save details</button> <button data-act="pdx">Cancel</button></p>':""}
+function showAdm(){var h='<p><button data-t="p">Products</button> <button data-t="c">Coupons</button> <button data-t="o">Orders ('+od.length+')</button> <button data-t="x">Close</button></p>',
+cs=CATS.map(function(c){return'<option>'+c[0]+'</option>'}).join(""),bs=BR.map(function(b){return'<option>'+b+'</option>'}).join("");
+if(tab=="p"){h+=edh()+'<p><b>Add product</b><br><input id="np_n" placeholder="Name"> <select id="np_c">'+cs+'</select> <select id="np_b">'+bs+'</select> <input id="np_p" type="number" placeholder="Price ₹" style="width:90px"> <input id="np_f" type="file" accept="image/*"> <button data-act="add">Add</button></p><p><b>Bulk photos</b> (name files 1.jpg to 100.jpg): <input id="bk" type="file" accept="image/*" multiple></p><table style="width:100%;font-size:13px">'+P.map(function(p){return'<tr><td>'+p.id+'</td><td>'+esc(p.n)+'</td><td><input data-pp="'+p.id+'" type="number" value="'+p.p+'" style="width:70px"></td><td><input data-pi="'+p.id+'" type="file" accept="image/*" style="width:150px"></td><td><label><input data-ph="'+p.id+'" type="checkbox"'+(p.h?' checked':'')+'> hide</label></td><td><button data-pd="'+p.id+'">Details</button></td><td><button data-pdel="'+p.id+'">Delete</button></td></tr>'}).join("")+'</table>'}
+else if(tab=="c"){h+='<p><b>Add coupon / offer</b><br><input id="cu_c" placeholder="CODE" style="width:100px"> <input id="cu_p" type="number" placeholder="% off" style="width:70px"> <input id="cu_m" type="number" placeholder="Min order ₹" style="width:100px"> <input id="cu_n" placeholder="Offer text (optional)" style="width:180px"> <label>Expires <input id="cu_e" type="date"></label> <label><input id="cu_s" type="checkbox" checked> Show on store</label> <button data-act="ac">Save coupon</button></p>'+(cd.map(function(c){var k=esc(c.code);return'<p style="border-bottom:1px solid var(--bd);font-size:13px"><b>'+k+'</b> — '+c.percent_off+'% off'+(c.min_order?' above ₹'+c.min_order:'')+(c.expires_at?' · expires '+new Date(c.expires_at).toLocaleDateString():'')+' · '+(c.active?'ON':'OFF')+' · '+(c.public?'shown on store':'hidden')+'<br><button data-ct="'+k+'">Turn on/off</button> <button data-cs="'+k+'" data-cv="'+(c.public?0:1)+'">'+(c.public?'Hide from store':'Show on store')+'</button> <button data-cd="'+k+'">Delete</button></p>'}).join("")||'<p>No coupons yet.</p>')}
+else{h+=od.map(function(o){var paid=o.ps=="Paid";return'<p style="border-bottom:1px solid var(--bd);font-size:13px"><b>#'+o.id+' · '+new Date(o.ts).toLocaleString()+'</b> · '+esc(o.nm||"")+' · '+esc(o.ph||"")+' · '+esc(o.email||"guest")+'<br>'+o.items.map(function(i){return esc(i.n)+' ×'+i.q}).join(", ")+'<br>Total <b>₹'+o.total+'</b>'+(o.coupon?' (coupon '+esc(o.coupon)+')':'')+'<br>'+esc(o.address||"")+'<br>UTR: <b>'+esc(o.utr||"—")+'</b> · Payment: <b>'+esc(o.ps||"")+'</b> '+(o.utr&&o.ps=="Awaiting verification"?'<button data-pay="'+o.id+'" data-pv="Paid">Mark payment received</button> <button data-pay="'+o.id+'" data-pv="Rejected">Reject</button>':'')+'<br>Order status: <select data-os="'+o.id+'"'+(paid||o.status=="Cancelled"?'':' disabled')+'>'+["New","Packed","Shipped","Delivered","Cancelled"].map(function(x){return'<option'+(x==o.status?' selected':'')+'>'+x+'</option>'}).join("")+'</select></p>'}).join("")||'<p>No orders yet.</p>'}
+$("ab").innerHTML=h}
+$("ab").onclick=function(e){var t=e.target.dataset;
+if(t.t){if(t.t=="x")$("adm").classList.remove("on");else{tab=t.t;showAdm()}}
+if(t.act=="add")addP();
+if(t.act=="ac")api("POST","/api/admin/coupons",{code:$("cu_c").value.trim(),pct:+$("cu_p").value,min:+$("cu_m").value||0,note:$("cu_n").value.trim(),expires:$("cu_e").value,pub:$("cu_s").checked}).then(function(){return refresh()}).then(loadOffers).catch(function(){alert("Check the coupon code and the % off (1 to 100).")});
+if(t.cs)api("PATCH","/api/admin/coupons/"+encodeURIComponent(t.cs),{pub:t.cv=="1"}).then(refresh).then(loadOffers);
+if(t.pay&&confirm(t.pv=="Paid"?"Mark payment as RECEIVED for order #"+t.pay+"? Check your bank / UPI app first.":"Reject this payment? The order will be cancelled."))api("PATCH","/api/admin/orders/"+t.pay+"/payment",{status:t.pv}).then(refresh);
+if(t.pd){editD=t.pd;showAdm()}
+if(t.act=="pdx"){editD=0;showAdm()}
+if(t.act=="pds"){var ei=editD;savep(ei,{d:$("pd_d").value.trim(),u:$("pd_u").value.trim()}).then(function(){editD=0;showAdm()})}
+if(t.cd)api("DELETE","/api/admin/coupons/"+encodeURIComponent(t.cd)).then(refresh).then(loadOffers);
+if(t.ct)api("PATCH","/api/admin/coupons/"+encodeURIComponent(t.ct)).then(refresh).then(loadOffers);
+if(t.pdel&&confirm("Delete this product? (If it has orders it is hidden instead.)"))api("DELETE","/api/admin/products/"+t.pdel).then(refresh)};
+$("ab").onchange=function(e){var x=e.target,t=x.dataset;
+if(t.pp)savep(t.pp,{p:+x.value});
+if(t.ph)savep(t.ph,{h:x.checked});
+if(t.pi&&x.files[0])shrink(x.files[0]).then(function(u){savep(t.pi,{im:u})});
+if(t.os)api("PATCH","/api/admin/orders/"+t.os,{status:x.value}).catch(function(){alert("Verify the payment first.");refresh()});
+if(x.id=="bk")bulk(x.files)};
+$("ad").onclick=function(){if(!AK)AK=prompt("Admin key")||"";
+refresh().then(function(){sessionStorage.setItem("ak",AK);tab="p";$("adm").classList.add("on")}).catch(function(){AK="";sessionStorage.removeItem("ak");alert("Wrong admin key")})};
+$("ac").onclick=function(){var c=$("cc").value.trim();fetch("/api/coupon/"+encodeURIComponent(c)).then(function(r){return r.ok?r.json():Promise.reject()}).then(function(d){coup={code:c.toUpperCase(),pct:d.pct,min:d.min||0};drawCart()}).catch(function(){coup=null;drawCart();$("cm").textContent="Invalid coupon"})};
+load().catch(function(){});render();drawCart();loadOffers();
+</script></body></html>
